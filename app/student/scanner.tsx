@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
     height: BOX_SIZE,
   },
   reticleOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
   },
