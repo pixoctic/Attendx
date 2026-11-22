@@ -14,8 +14,15 @@ import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
 export default function UnifiedLoginScreen() {
+  const [isLogin, setIsLogin] = useState(true);
+
+  // Form State
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [batch, setBatch] = useState('');
+  const [admissionNo, setAdmissionNo] = useState('');
+  const [department, setDepartment] = useState('');
 
   const handleLogin = () => {
     const parsedEmail = email.trim().toLowerCase();
@@ -34,6 +41,20 @@ export default function UnifiedLoginScreen() {
       // Default to student portal
       router.replace('/student');
     }
+  };
+
+  const handleRegister = () => {
+    if (!fullName || !admissionNo || !department || !email || !password) {
+      Alert.alert('Missing Fields', 'Please fill in all required details.');
+      return;
+    }
+
+    // Simulate sending to admin for approval
+    Alert.alert(
+      'Registration Submitted ✅',
+      'Your request has been sent to the Department Admin. You will be able to log in once your profile and hardware UUID are approved.',
+      [{ text: 'OK', onPress: () => setIsLogin(true) }]
+    );
   };
 
   return (
@@ -64,14 +85,81 @@ export default function UnifiedLoginScreen() {
           </View>
         </View>
 
-        {/* Login Form Card */}
+        {/* Auth Form Card */}
         <View style={styles.loginCard}>
-          <Text style={styles.cardHeading}>Welcome Back</Text>
+          <Text style={styles.cardHeading}>
+            {isLogin ? 'Welcome Back' : 'Request Access'}
+          </Text>
           <Text style={styles.cardSubheading}>
-            Sign in to access your dashboard. Your role will be assigned automatically.
+            {isLogin
+              ? 'Sign in to access your dashboard. Your role will be assigned automatically.'
+              : 'Submit your details. An admin must approve your profile before you can sign in.'}
           </Text>
 
-          {/* Email Input */}
+          {/* === REGISTRATION ONLY FIELDS === */}
+          {!isLogin && (
+            <>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Full Name</Text>
+                <View style={styles.inputWrapper}>
+                  <Feather name="user" size={17} color="#64748B" />
+                  <TextInput
+                    style={styles.textInput}
+                    value={fullName}
+                    onChangeText={setFullName}
+                    placeholder="Alex Henderson"
+                    placeholderTextColor="#94A3B8"
+                  />
+                </View>
+              </View>
+
+              <View style={styles.inputRow}>
+                <View style={[styles.inputGroup, { flex: 1 }]}>
+                  <Text style={styles.inputLabel}>Batch</Text>
+                  <View style={styles.inputWrapper}>
+                    <Feather name="calendar" size={17} color="#64748B" />
+                    <TextInput
+                      style={styles.textInput}
+                      value={batch}
+                      onChangeText={setBatch}
+                      placeholder="2024-2027"
+                      placeholderTextColor="#94A3B8"
+                    />
+                  </View>
+                </View>
+
+                <View style={[styles.inputGroup, { flex: 1.2 }]}>
+                  <Text style={styles.inputLabel}>Admission No</Text>
+                  <View style={styles.inputWrapper}>
+                    <Feather name="hash" size={17} color="#64748B" />
+                    <TextInput
+                      style={styles.textInput}
+                      value={admissionNo}
+                      onChangeText={setAdmissionNo}
+                      placeholder="CS-88"
+                      placeholderTextColor="#94A3B8"
+                    />
+                  </View>
+                </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Department</Text>
+                <View style={styles.inputWrapper}>
+                  <Feather name="book" size={17} color="#64748B" />
+                  <TextInput
+                    style={styles.textInput}
+                    value={department}
+                    onChangeText={setDepartment}
+                    placeholder="Computer Engineering"
+                    placeholderTextColor="#94A3B8"
+                  />
+                </View>
+              </View>
+            </>
+          )}
+
+          {/* === COMMON FIELDS (EMAIL & PASSWORD) === */}
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Email Address</Text>
             <View style={styles.inputWrapper}>
@@ -88,7 +176,6 @@ export default function UnifiedLoginScreen() {
             </View>
           </View>
 
-          {/* Password Input */}
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Password</Text>
             <View style={styles.inputWrapper}>
@@ -104,24 +191,46 @@ export default function UnifiedLoginScreen() {
             </View>
           </View>
 
-          {/* Sign In Button */}
+          {/* Action Button */}
           <TouchableOpacity
             activeOpacity={0.88}
             style={styles.signInBtn}
-            onPress={handleLogin}
+            onPress={isLogin ? handleLogin : handleRegister}
           >
-            <Text style={styles.signInBtnText}>Secure Sign In</Text>
-            <Feather name="arrow-right" size={18} color="#FFFFFF" />
+            <Text style={styles.signInBtnText}>
+              {isLogin ? 'Secure Sign In' : 'Submit for Approval'}
+            </Text>
+            <Feather name={isLogin ? "arrow-right" : "check"} size={18} color="#FFFFFF" />
+          </TouchableOpacity>
+
+          {/* Toggle Login/Register */}
+          <TouchableOpacity
+            style={styles.toggleAuthBtn}
+            onPress={() => setIsLogin(!isLogin)}
+          >
+            <Text style={styles.toggleAuthText}>
+              {isLogin
+                ? "Don't have an account? Request Access"
+                : "Already registered? Sign in instead"}
+            </Text>
           </TouchableOpacity>
         </View>
 
-        {/* Helper text for testing */}
-        <View style={styles.helperBox}>
-          <Text style={styles.helperTitle}>Demo Routing Guide:</Text>
-          <Text style={styles.helperText}>• Type <Text style={styles.boldText}>alex@student.edu</Text> for Student Portal</Text>
-          <Text style={styles.helperText}>• Type <Text style={styles.boldText}>henderson@faculty.edu</Text> for Teacher Portal</Text>
-          <Text style={styles.helperText}>• Type <Text style={styles.boldText}>root@admin.edu</Text> for Admin Portal</Text>
-        </View>
+        {/* Helper text for testing (Only show on Login) */}
+        {isLogin && (
+          <View style={styles.helperBox}>
+            <Text style={styles.helperTitle}>Demo Routing Guide:</Text>
+            <Text style={styles.helperText}>
+              • Type <Text style={styles.boldText}>alex@student.edu</Text> for Student Portal
+            </Text>
+            <Text style={styles.helperText}>
+              • Type <Text style={styles.boldText}>henderson@faculty.edu</Text> for Teacher Portal
+            </Text>
+            <Text style={styles.helperText}>
+              • Type <Text style={styles.boldText}>root@admin.edu</Text> for Admin Portal
+            </Text>
+          </View>
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -218,8 +327,12 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     lineHeight: 18,
   },
+  inputRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
   inputGroup: {
-    marginBottom: 18,
+    marginBottom: 16,
   },
   inputLabel: {
     fontSize: 11,
@@ -260,6 +373,15 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '800',
+  },
+  toggleAuthBtn: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  toggleAuthText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#2563EB',
   },
   helperBox: {
     marginTop: 32,
